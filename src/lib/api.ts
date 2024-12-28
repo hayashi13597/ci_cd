@@ -4,6 +4,7 @@ import matter from "gray-matter";
 import { join } from "path";
 
 const postsDirectory = join(process.cwd(), "_posts");
+const config = require("../../next.config.js");
 
 export function getPostSlugs() {
   return fs.readdirSync(postsDirectory);
@@ -20,9 +21,14 @@ export function getPostBySlug(slug: string) {
 
 export function getAllPosts(): Post[] {
   const slugs = getPostSlugs();
-  const posts = slugs
+  let posts = slugs
     .map((slug) => getPostBySlug(slug))
     // sort posts by date in descending order
     .sort((post1, post2) => (post1.date > post2.date ? -1 : 1));
+
+  let postsString = JSON.stringify(posts);
+  // replace all /assets/ with the correct path
+  postsString = postsString.replace(/\/assets\//g, config.basePath + "/assets/");
+  posts = JSON.parse(postsString);
   return posts;
 }
